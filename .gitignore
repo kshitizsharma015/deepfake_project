@@ -10,9 +10,14 @@ generation/
 *.mp4
 *.onnx
 *.csv
+*.h5
+*.safetensors
 
 # Python cache
 __pycache__/
 
 # IDE files
 .vscode/
+
+# Node modules
+node_modules/

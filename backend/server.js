@@ -40,7 +40,7 @@ app.post('/auth/signup', (req, res) => {
   const { name, email, password } = req.body;
   const users = readUsers();
   if (users.find(u => u.email === email)) return res.status(400).json({ error: "User already exists" });
-  
+
   const newUser = { id: Date.now(), name, email, password }; // In prod, hash password!
   users.push(newUser);
   writeUsers(users);
@@ -51,7 +51,7 @@ app.post('/auth/login', (req, res) => {
   const { email, password } = req.body;
   const users = readUsers();
   const user = users.find(u => u.email === email && u.password === password);
-  
+
   if (!user) return res.status(401).json({ error: "Invalid credentials" });
   res.json({ success: true, user });
 });
@@ -66,8 +66,8 @@ app.post('/generate', upload.fields([{ name: 'source_image' }, { name: 'target_v
 
   let options = {
     mode: 'text', pythonOptions: ['-u'],
-    pythonPath: 'E:\\DeepFakeProject\\generation\\venv_generation\\Scripts\\python.exe', 
-    scriptPath: path.resolve(__dirname, '../generation/roop/'), 
+    pythonPath: 'E:\\DeepFakeProject\\generation\\venv_generation\\Scripts\\python.exe',
+    scriptPath: path.resolve(__dirname, '../generation/roop/'),
     args: ['-s', sourcePath, '-t', targetPath, '-o', outputPath, '--execution-provider', 'cpu']
   };
 
@@ -90,24 +90,35 @@ const loadExternalModelsConfig = () => {
   return { enabled: false, external_models: [] };
 };
 
-// --- DETECT ROUTE (Single Model) ---
+// --- DETECT ROUTE (Unified - Uses Dual Model by Default) ---
 app.post('/detect', upload.single('video'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No video uploaded' });
 
   const videoPath = req.file.path;
   const modelPath = path.resolve(__dirname, '../detection/deepfake_model.h5');
+  const externalModelsConfig = loadExternalModelsConfig();
+
+  // Get enabled external API URL (or local model flag)
+  let externalApiUrl = 'none';
+  if (externalModelsConfig.enabled && externalModelsConfig.external_models.length > 0) {
+    const enabledModel = externalModelsConfig.external_models.find(m => m.enabled);
+    if (enabledModel) {
+      externalApiUrl = enabledModel.api_url;
+      console.log(`>>> Using secondary model: ${enabledModel.name}`);
+    }
+  }
 
   let options = {
-    mode: 'text', 
+    mode: 'text',
     pythonOptions: ['-u'],
     pythonPath: 'E:\\DeepFakeProject\\detection\\venv_detection\\Scripts\\python.exe',
-    scriptPath: path.resolve(__dirname, '../detection/'), 
-    args: [ videoPath, modelPath ]
+    scriptPath: path.resolve(__dirname, '../detection/'),
+    args: [videoPath, modelPath, externalApiUrl]
   };
 
-  console.log(">>> STARTING PYTHON PROCESS (Single Model)...");
+  console.log(">>> STARTING DETECTION PROCESS (Dual-Model Engine)...");
 
-  let pyshell = new PythonShell('detect.py', options);
+  let pyshell = new PythonShell('detect_dual_model.py', options);
   let resultJson = null;
 
   pyshell.on('stderr', function (stderr) {
@@ -125,46 +136,49 @@ app.post('/detect', upload.single('video'), (req, res) => {
 
   pyshell.end(function (err, code, signal) {
     if (err) {
-        console.error("Python crashed:", err);
-        return res.status(500).json({ error: 'Detection failed', details: err.message });
+      console.error("Python crashed:", err);
+      return res.status(500).json({ error: 'Detection failed', details: err.message });
     }
-    
+
     if (!resultJson) {
-        return res.status(500).json({ error: "No valid JSON output from Python" });
+      return res.status(500).json({ error: "No valid JSON output from Python" });
     }
-    
-    console.log(">>> PYTHON FINISHED. SENDING RESULT.");
+
+    console.log(">>> DETECTION COMPLETE.");
     res.json(resultJson);
   });
 });
 
-// --- DETECT ROUTE (Dual Model) ---
+// --- DETECT ROUTE (Dual Model - Legacy Endpoint) ---
 app.post('/detect-dual', upload.single('video'), (req, res) => {
+  // Redirect to main detect logic or keep as alias
+  // For simplicity, we'll just forward to the same logic or keep it separate if needed.
+  // Since we updated /detect to be the main one, we can just duplicate the logic or redirect.
+  // Let's keep it consistent with /detect for now.
+
   if (!req.file) return res.status(400).json({ error: 'No video uploaded' });
 
   const videoPath = req.file.path;
   const modelPath = path.resolve(__dirname, '../detection/deepfake_model.h5');
   const externalModelsConfig = loadExternalModelsConfig();
-  
-  // Get enabled external API URL
+
   let externalApiUrl = 'none';
   if (externalModelsConfig.enabled && externalModelsConfig.external_models.length > 0) {
     const enabledModel = externalModelsConfig.external_models.find(m => m.enabled);
     if (enabledModel) {
       externalApiUrl = enabledModel.api_url;
-      console.log(`>>> Using external model: ${enabledModel.name} (${enabledModel.api_url})`);
     }
   }
 
   let options = {
-    mode: 'text', 
+    mode: 'text',
     pythonOptions: ['-u'],
     pythonPath: 'E:\\DeepFakeProject\\detection\\venv_detection\\Scripts\\python.exe',
-    scriptPath: path.resolve(__dirname, '../detection/'), 
-    args: [ videoPath, modelPath, externalApiUrl ]
+    scriptPath: path.resolve(__dirname, '../detection/'),
+    args: [videoPath, modelPath, externalApiUrl]
   };
 
-  console.log(">>> STARTING DUAL-MODEL DETECTION PROCESS...");
+  console.log(">>> STARTING DUAL-MODEL DETECTION PROCESS (Legacy Endpoint)...");
 
   let pyshell = new PythonShell('detect_dual_model.py', options);
   let resultJson = null;
@@ -178,20 +192,19 @@ app.post('/detect-dual', upload.single('video'), (req, res) => {
       const parsed = JSON.parse(message);
       if (parsed.final_verdict) resultJson = parsed;
     } catch (e) {
-      // Ignore non-JSON messages
     }
   });
 
   pyshell.end(function (err, code, signal) {
     if (err) {
-        console.error("Python crashed:", err);
-        return res.status(500).json({ error: 'Detection failed', details: err.message });
+      console.error("Python crashed:", err);
+      return res.status(500).json({ error: 'Detection failed', details: err.message });
     }
-    
+
     if (!resultJson) {
-        return res.status(500).json({ error: "No valid JSON output from Python" });
+      return res.status(500).json({ error: "No valid JSON output from Python" });
     }
-    
+
     console.log(">>> DUAL-MODEL DETECTION COMPLETE.");
     res.json(resultJson);
   });
