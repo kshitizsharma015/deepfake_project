@@ -11,7 +11,11 @@ const PORT = 5000;
 const USERS_FILE = path.join(__dirname, 'users.json');
 
 // --- Middleware ---
-app.use(cors());
+app.use(cors({
+  origin: ["http://172.16.53.75:3000", "https://deepfake-ui.onrender.com", "http://localhost:3000", "https://nonsequent-hermine-loxodromically.ngrok-free.dev"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
 
 // --- Directory Setup ---
@@ -225,6 +229,10 @@ app.post('/config/external-models', (req, res) => {
     res.status(500).json({ error: 'Failed to save config', details: e.message });
   }
 });
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+})
 
 // --- Start Server ---
 app.listen(PORT, () => {
