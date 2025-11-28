@@ -348,7 +348,7 @@ const DeveloperAPIModal = ({ apiKey, onClose }) => {
           <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(147, 51, 234, 0.1)', borderRadius: '8px', border: '1px solid rgba(147, 51, 234, 0.3)' }}>
             <h4 style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Example Usage:</h4>
             <pre className="code-block">
-              {`curl -X POST http://localhost:5000/detect \\
+              {`curl -X POST ${process.env.REACT_APP_API_URL}/detect \\
   -H "Authorization: Bearer ${apiKey}" \\
   -F "video=@yourfile.mp4"`}
             </pre>
@@ -372,7 +372,7 @@ const LoginView = ({ setUser, setView }) => {
     setError('');
     const endpoint = isSignup ? '/auth/signup' : '/auth/login';
     try {
-      const res = await axios.post(`http://localhost:5000${endpoint}`, formData);
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}${endpoint}`, formData);
       setUser(res.data.user);
       setView('home');
     } catch (err) {
@@ -662,7 +662,7 @@ const GenerateView = ({ addToHistory }) => {
     formData.append('target_video', targetFile);
 
     try {
-      const response = await axios.post('http://localhost:5000/generate', formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/generate`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         responseType: 'blob'
       });
@@ -818,7 +818,7 @@ const DetectView = ({ addToHistory }) => {
     const formData = new FormData();
     formData.append('video', file);
 
-    const endpoint = 'http://localhost:5000/detect';
+    const endpoint = `${process.env.REACT_APP_API_URL}/detect`;
 
     try {
       const response = await axios.post(endpoint, formData, {
