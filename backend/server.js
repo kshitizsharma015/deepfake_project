@@ -4,8 +4,12 @@ const cors = require('cors');
 const multer = require('multer');
 const { PythonShell } = require('python-shell');
 const path = require('path');
-const fs = require('fs');
+console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+next();
+});
 
+// --- Directory Setup ---
+const outputDir = path.join(__dirname, 'outputs');
 const uploadDir = path.join(__dirname, 'uploads');
 [outputDir, uploadDir].forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
