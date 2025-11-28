@@ -6,20 +6,6 @@ const { PythonShell } = require('python-shell');
 const path = require('path');
 const fs = require('fs');
 
-const app = express();
-const PORT = 5000;
-const USERS_FILE = path.join(__dirname, 'users.json');
-
-// --- Middleware ---
-app.use(cors({
-  origin: ["http://172.16.53.75:3000", "https://deepfake-ui.onrender.com", "http://localhost:3000", "https://nonsequent-hermine-loxodromically.ngrok-free.dev"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
-app.use(express.json());
-
-// --- Directory Setup ---
-const outputDir = path.join(__dirname, 'outputs');
 const uploadDir = path.join(__dirname, 'uploads');
 [outputDir, uploadDir].forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
