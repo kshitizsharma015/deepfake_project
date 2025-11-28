@@ -4,8 +4,25 @@ const cors = require('cors');
 const multer = require('multer');
 const { PythonShell } = require('python-shell');
 const path = require('path');
-console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-next();
+const fs = require('fs');
+
+const app = express();
+const PORT = 5000;
+const USERS_FILE = path.join(__dirname, 'users.json');
+
+// --- Middleware ---
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization", "ngrok-skip-browser-warning"],
+  credentials: true
+}));
+app.use(express.json());
+
+// --- Request Logger ---
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
 });
 
 // --- Directory Setup ---
