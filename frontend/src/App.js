@@ -487,10 +487,10 @@ const AboutView = () => (
   <div className="fade-in" style={{ marginTop: '2rem' }}>
     {/* Hero Section */}
     <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-      <h1 className="hero-title" style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+      <h1 className="hero-title about-hero-title" style={{ marginBottom: '1rem' }}>
         About <span className="neon-text">Team T72</span>
       </h1>
-      <p className="hero-sub" style={{ fontSize: '1.2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <p className="hero-sub about-hero-sub" style={{ maxWidth: '800px', margin: '0 auto' }}>
         Curious AI enthusiasts experimenting with cutting-edge technology to shape the future of digital media.
       </p>
     </div>
