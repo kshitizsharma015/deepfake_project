@@ -372,7 +372,9 @@ const LoginView = ({ setUser, setView }) => {
     setError('');
     const endpoint = isSignup ? '/auth/signup' : '/auth/login';
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}${endpoint}`, formData);
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}${endpoint}`, formData, {
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+      });
       setUser(res.data.user);
       setView('home');
     } catch (err) {
@@ -663,7 +665,10 @@ const GenerateView = ({ addToHistory }) => {
 
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/generate`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'ngrok-skip-browser-warning': 'true'
+        },
         responseType: 'blob'
       });
       const url = URL.createObjectURL(new Blob([response.data]));
@@ -822,7 +827,10 @@ const DetectView = ({ addToHistory }) => {
 
     try {
       const response = await axios.post(endpoint, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'ngrok-skip-browser-warning': 'true'
+        },
         timeout: 120000
       });
       setResult(response.data);
