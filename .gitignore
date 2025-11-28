@@ -1,0 +1,18 @@
+# Virtual Environments
+venv/
+venv_detection/
+venv_generation/
+
+# Datasets and Large Files
+dataset/
+detection/
+generation/
+*.mp4
+*.onnx
+*.csv
+
+# Python cache
+__pycache__/
+
+# IDE files
+.vscode/
