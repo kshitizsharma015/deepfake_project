@@ -8,6 +8,8 @@ import {
   Settings, Moon, Sun, User, Globe, Lock
 } from 'lucide-react';
 import './App.css';
+import { auth, googleProvider } from './firebase-config'; // Real Auth
+import { signInWithPopup } from 'firebase/auth';
 
 function App() {
   // --- Global State ---
@@ -382,11 +384,32 @@ const LoginView = ({ setUser, setView }) => {
     }
   };
 
-  const mockGoogleLogin = () => {
-    setTimeout(() => {
-      setUser({ name: "Google User", email: "google_user@gmail.com" });
+  import { auth, googleProvider } from './firebase-config';
+  import { signInWithPopup } from 'firebase/auth';
+
+  // ... inside LoginView component ...
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Log login to backend (for Sheets tracking)
+      axios.post(`${process.env.REACT_APP_API_URL}/auth/log-visit`, {
+        email: user.email,
+        name: user.displayName
+      }).catch(err => console.error("Logging failed", err));
+
+      setUser({
+        name: user.displayName,
+        email: user.email,
+        avatar: user.photoURL
+      });
       setView('home');
-    }, 1000);
+    } catch (error) {
+      console.error("Login Failed:", error);
+      alert(`Login Failed: ${error.message}`);
+    }
   };
 
   return (
@@ -396,7 +419,7 @@ const LoginView = ({ setUser, setView }) => {
         <h2>{isSignup ? 'Create Account' : 'System Access'}</h2>
         <p className="text-muted">Authenticate to access neural engines.</p>
 
-        <button className="btn-google" onClick={mockGoogleLogin}>
+        <button className="btn-google" onClick={handleGoogleLogin}>
           <Globe size={18} /> Sign in with Google
         </button>
 
