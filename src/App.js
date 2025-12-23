@@ -652,9 +652,69 @@ const GenerateView = ({ addToHistory }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const [progress, setProgress] = useState(0);
+  const [tabWarning, setTabWarning] = useState(false);
+
+  // --- Tab Switch & Close Warning Logic ---
+  useEffect(() => {
+    if (!loading) return;
+
+    // 1. Prevent closing tab
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = ''; // Legacy support
+      return '';
+    };
+
+    // 2. Warn on Tab Switch
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // We can't alert/confirm here reliably, but we can update UI or notify
+        // Ideally, use the Web Notification API if permitted, or just setting a document title
+        document.title = "⚠️ DON'T CLOSE! Processing...";
+        setTabWarning(true);
+      } else {
+        document.title = "Synthetix AI"; // Restore
+        // Optional: show a toast/modal saying "Please keep this tab open!"
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.title = "Synthetix AI";
+    };
+  }, [loading]);
+
+  // --- Progress Simulation (7 Minutes) ---
+  useEffect(() => {
+    if (!loading) {
+      setProgress(0);
+      return;
+    }
+
+    // 420 seconds (7 mins) to reach ~95%
+    // Increment roughly every 4 seconds -> 1%
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 95) return prev; // Hold at 95 until done
+        // Slow down as we get closer
+        const increment = prev < 50 ? 0.5 : 0.2;
+        return Math.min(prev + increment, 95);
+      });
+    }, 2000); // Update every 2s
+
+    return () => clearInterval(interval);
+  }, [loading]);
+
   const handleGenerate = async () => {
     if (!sourceFile || !targetFile) return alert("Please upload both files.");
     setLoading(true);
+    setTabWarning(false);
+    setProgress(0);
 
     // Scroll to bottom to show loading
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -673,6 +733,7 @@ const GenerateView = ({ addToHistory }) => {
       });
       const url = URL.createObjectURL(new Blob([response.data]));
       setVideoUrl(url);
+      setProgress(100); // Complete
       addToHistory('GEN', targetFile.name, { label: 'Success', probability: 1 });
     } catch (error) {
       console.error(error);
@@ -718,9 +779,41 @@ const GenerateView = ({ addToHistory }) => {
         )}
 
         {loading && (
-          <div className="loading-container">
-            <Loader2 className="spin" />
-            Processing Neural Weights... This may take a minute.
+          <div className="loading-container glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
+            <Loader2 className="spin" size={48} style={{ marginBottom: '1rem', color: 'var(--primary)' }} />
+
+            <h3 style={{ marginBottom: '0.5rem' }}>Neural Synthesis In Progress...</h3>
+            <p className="text-muted" style={{ marginBottom: '1.5rem' }}>
+              We are merging facial embeddings frame-by-frame. This is a heavy AI process.
+            </p>
+
+            {/* Progress Bar */}
+            <div style={{ width: '100%', height: '12px', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', overflow: 'hidden', marginBottom: '0.5rem' }}>
+              <div style={{
+                width: `${progress}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, var(--primary), var(--secondary))',
+                transition: 'width 0.5s ease'
+              }} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              <span>Progress: {Math.round(progress)}%</span>
+              <span>Estimated time: 5-7 minutes</span>
+            </div>
+
+            {/* Tab Warning Alert */}
+            {tabWarning && (
+              <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', borderRadius: '8px', color: '#ff6b6b' }}>
+                <AlertTriangle size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
+                <strong>Warning:</strong> You switched tabs! Please keep this tab open and active to prevent the server connection from dropping.
+              </div>
+            )}
+
+            <div style={{ marginTop: '1rem', fontSize: '0.8rem', opacity: 0.7 }}>
+              <Info size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+              Do not close or reload this page.
+            </div>
           </div>
         )}
 
