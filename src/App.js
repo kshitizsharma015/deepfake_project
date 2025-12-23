@@ -384,10 +384,7 @@ const LoginView = ({ setUser, setView }) => {
     }
   };
 
-  import { auth, googleProvider } from './firebase-config';
-  import { signInWithPopup } from 'firebase/auth';
 
-  // ... inside LoginView component ...
 
   const handleGoogleLogin = async () => {
     try {
