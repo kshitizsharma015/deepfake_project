@@ -54,8 +54,10 @@ function App() {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  // --- Auth Logic ---
+  /* --- Auth Logic --- */
   const handleLogout = () => {
+    localStorage.removeItem('synthetix_history'); // Privacy Fix: Clear history
+    setHistory([]);
     setUser(null);
     setView('login');
     setHistoryOpen(false);
@@ -825,7 +827,7 @@ const GenerateView = ({ addToHistory }) => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
               <span>Progress: {Math.round(progress)}%</span>
-              <span>Estimated time: 5-7 minutes</span>
+              <span>Process will take few minutes</span>
             </div>
 
             {/* Tab Warning Alert */}
