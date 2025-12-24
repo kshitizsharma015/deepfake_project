@@ -377,8 +377,14 @@ const LoginView = ({ setUser, setView }) => {
       const res = await axios.post(`${process.env.REACT_APP_API_URL}${endpoint}`, formData, {
         headers: { 'ngrok-skip-browser-warning': 'true' }
       });
-      setUser(res.data.user);
       setView('home');
+
+      // Log visit to backend
+      axios.post(`${process.env.REACT_APP_API_URL}/auth/log-visit`, {
+        email: email,
+        name: res.data.user.name
+      }).catch(err => console.error("Logging failed", err));
+
     } catch (err) {
       setError(err.response?.data?.error || 'Authentication failed');
     }
