@@ -632,7 +632,7 @@ const AboutView = () => (
   </div>
 );
 
-const GenerateView = ({ addToHistory }) => {
+const GenerateView = ({ addToHistory, user }) => {
   const [sourceFile, setSourceFile] = useState(null);
   const [targetFile, setTargetFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -750,6 +750,8 @@ const GenerateView = ({ addToHistory }) => {
     const formData = new FormData();
     formData.append('source_image', sourceFile);
     formData.append('target_video', targetFile);
+    formData.append('user_name', user ? user.name : 'Guest');
+    formData.append('user_name', user ? user.name : 'Guest');
 
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/generate`, formData, {
@@ -894,7 +896,7 @@ const GenerateView = ({ addToHistory }) => {
   );
 };
 
-const DetectView = ({ addToHistory }) => {
+const DetectView = ({ addToHistory, user }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -943,6 +945,8 @@ const DetectView = ({ addToHistory }) => {
     setError(null);
     const formData = new FormData();
     formData.append('video', file);
+    formData.append('user_name', user ? user.name : 'Guest');
+    formData.append('user_name', user ? user.name : 'Guest');
 
     const endpoint = `${process.env.REACT_APP_API_URL}/detect`;
 
