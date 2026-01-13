@@ -7,6 +7,12 @@ import {
   Terminal, Loader2, History, Info, FileText, X,
   Settings, Moon, Sun, User, Globe, Lock
 } from 'lucide-react';
+
+// Team Images
+import kshitizImg from './assets/kshitiz.png';
+import utkarshImg from './assets/utkarsh.png';
+import sakshamImg from './assets/saksham.png';
+
 import './App.css';
 import { auth, googleProvider } from './firebase-config'; // Real Auth
 import { signInWithPopup } from 'firebase/auth';
@@ -554,19 +560,19 @@ const AboutView = () => (
       <h2 className="section-title"><User size={24} /> Meet the Team</h2>
       <div className="team-grid">
         <div className="team-card">
-          <img src="/kshitiz.png" alt="Kshitiz Sharma" className="team-avatar-img" />
+          <img src={kshitizImg} alt="Kshitiz Sharma" className="team-avatar-img" />
           <h3>Kshitiz Sharma</h3>
           <p className="team-role">AI & Research</p>
           <p className="text-muted">Specialized in machine learning models and neural network architectures for deepfake detection and generation.</p>
         </div>
         <div className="team-card">
-          <img src="/utkarsh.png" alt="Utkarsh Chauhan" className="team-avatar-img" />
+          <img src={utkarshImg} alt="Utkarsh Chauhan" className="team-avatar-img" />
           <h3>Utkarsh Chauhan</h3>
           <p className="team-role">Full Stack Development</p>
           <p className="text-muted">Built the complete web infrastructure, from responsive frontend to robust backend APIs.</p>
         </div>
         <div className="team-card">
-          <img src="/saksham.png" alt="Saksham Gupta" className="team-avatar-img" />
+          <img src={sakshamImg} alt="Saksham Gupta" className="team-avatar-img" />
           <h3>Saksham Gupta</h3>
           <p className="team-role">Integration & Deployment</p>
           <p className="text-muted">Seamlessly integrated AI models with the application and managed deployment pipelines.</p>
