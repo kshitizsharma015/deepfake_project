@@ -11,10 +11,10 @@ import './App.css';
 import { auth, googleProvider } from './firebase-config';
 import { signInWithPopup } from 'firebase/auth';
 
-// Team Images - Using UI Avatars API (reliable external hosting)
-const kshitizImg = 'https://ui-avatars.com/api/?name=Kshitiz+Sharma&background=6366f1&color=fff&size=200&font-size=0.4&bold=true';
-const utkarshImg = 'https://ui-avatars.com/api/?name=Utkarsh+Chauhan&background=8b5cf6&color=fff&size=200&font-size=0.4&bold=true';
-const sakshamImg = 'https://ui-avatars.com/api/?name=Saksham+Gupta&background=a855f7&color=fff&size=200&font-size=0.4&bold=true';
+// Team Images - Served from public folder
+const kshitizImg = '/kshitiz.png';
+const utkarshImg = '/utkarsh.png';
+const sakshamImg = '/saksham.png';
 
 function App() {
   // --- Global State ---
