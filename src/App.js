@@ -8,10 +8,10 @@ import {
   Settings, Moon, Sun, User, Globe, Lock
 } from 'lucide-react';
 
-// Team Images
-import kshitizImg from './assets/kshitiz.png';
-import utkarshImg from './assets/utkarsh.png';
-import sakshamImg from './assets/saksham.png';
+// Team Images - Using UI Avatars API (reliable external hosting)
+const kshitizImg = 'https://ui-avatars.com/api/?name=Kshitiz+Sharma&background=6366f1&color=fff&size=200&font-size=0.4&bold=true';
+const utkarshImg = 'https://ui-avatars.com/api/?name=Utkarsh+Chauhan&background=8b5cf6&color=fff&size=200&font-size=0.4&bold=true';
+const sakshamImg = 'https://ui-avatars.com/api/?name=Saksham+Gupta&background=a855f7&color=fff&size=200&font-size=0.4&bold=true';
 
 import './App.css';
 import { auth, googleProvider } from './firebase-config'; // Real Auth
