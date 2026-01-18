@@ -7,15 +7,14 @@ import {
   Terminal, Loader2, History, Info, FileText, X,
   Settings, Moon, Sun, User, Globe, Lock
 } from 'lucide-react';
+import './App.css';
+import { auth, googleProvider } from './firebase-config';
+import { signInWithPopup } from 'firebase/auth';
 
 // Team Images - Using UI Avatars API (reliable external hosting)
 const kshitizImg = 'https://ui-avatars.com/api/?name=Kshitiz+Sharma&background=6366f1&color=fff&size=200&font-size=0.4&bold=true';
 const utkarshImg = 'https://ui-avatars.com/api/?name=Utkarsh+Chauhan&background=8b5cf6&color=fff&size=200&font-size=0.4&bold=true';
 const sakshamImg = 'https://ui-avatars.com/api/?name=Saksham+Gupta&background=a855f7&color=fff&size=200&font-size=0.4&bold=true';
-
-import './App.css';
-import { auth, googleProvider } from './firebase-config'; // Real Auth
-import { signInWithPopup } from 'firebase/auth';
 
 function App() {
   // --- Global State ---
@@ -389,7 +388,7 @@ const LoginView = ({ setUser, setView }) => {
 
       // Log visit to backend
       axios.post(`${process.env.REACT_APP_API_URL}/auth/log-visit`, {
-        email: email,
+        email: formData.email,
         name: res.data.user.name
       }).catch(err => console.error("Logging failed", err));
 
