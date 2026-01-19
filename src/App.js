@@ -758,21 +758,73 @@ const GenerateView = ({ addToHistory, user }) => {
     formData.append('user_name', user ? user.name : 'Guest');
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/generate`, formData, {
+      // Step 1: Submit job and get jobId immediately
+      const submitResponse = await axios.post(`${process.env.REACT_APP_API_URL}/generate`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'ngrok-skip-browser-warning': 'true'
-        },
-        responseType: 'blob'
+        }
       });
-      const url = URL.createObjectURL(new Blob([response.data]));
-      setVideoUrl(url);
-      setProgress(100); // Complete
-      addToHistory('GEN', targetFile.name, { label: 'Success', probability: 1 });
+
+      const { jobId } = submitResponse.data;
+      console.log(`[Generate] Job started: ${jobId}`);
+
+      // Step 2: Poll for job status
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusResponse = await axios.get(`${process.env.REACT_APP_API_URL}/status/${jobId}`, {
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+          });
+
+          const job = statusResponse.data;
+          console.log(`[Generate] Job ${jobId}: ${job.status} (${job.progress}%)`);
+
+          // Update progress bar
+          setProgress(job.progress || 0);
+
+          // Check if job completed
+          if (job.status === 'completed') {
+            clearInterval(pollInterval);
+
+            // Download the video
+            const downloadResponse = await axios.get(`${process.env.REACT_APP_API_URL}/download/${jobId}`, {
+              responseType: 'blob',
+              headers: { 'ngrok-skip-browser-warning': 'true' }
+            });
+
+            const url = URL.createObjectURL(new Blob([downloadResponse.data]));
+            setVideoUrl(url);
+            setProgress(100);
+            addToHistory('GEN', targetFile.name, { label: 'Success', probability: 1 });
+            setLoading(false);
+          }
+
+          // Check if job failed
+          if (job.status === 'failed') {
+            clearInterval(pollInterval);
+            console.error(`[Generate] Job failed:`, job.error);
+            alert(`Generation failed: ${job.error || 'Unknown error'}`);
+            setLoading(false);
+          }
+        } catch (pollError) {
+          console.error('[Generate] Polling error:', pollError);
+          // Don't stop polling on network hiccups, just log
+        }
+      }, 3000); // Poll every 3 seconds
+
+      // Safety timeout: stop polling after 30 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (loading) {
+          console.error('[Generate] Job timed out');
+          alert('Generation is taking too long. Please check the backend logs.');
+          setLoading(false);
+        }
+      }, 30 * 60 * 1000);
+
     } catch (error) {
-      console.error(error);
-      alert("Generation failed. Check backend connection.");
-    } finally {
+      console.error('[Generate] Submit error:', error);
+      alert("Failed to start generation. Check backend connection.");
       setLoading(false);
     }
   };
